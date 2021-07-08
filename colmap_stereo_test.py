@@ -58,10 +58,11 @@ def read_trajectory(file):
 
 
 if __name__ == '__main__':
-    filename = '/home/bjoshi/Downloads/images.txt'
+    filename = '/home/bjoshi/colmap_cave_stereo/latest/images.txt'
     read_trajectory(filename)
 
     baseline = []
+    quats = []
     for limg, lpose in left_poses.items():
         if not limg in right_poses:
             print('No right image for: {}'.format(limg))
@@ -70,9 +71,16 @@ if __name__ == '__main__':
             rpose = right_poses[limg]
         diff = rpose.between(lpose)
         trans  = diff.translation()
+        quat = diff.rotation().quaternion()
+        quats.append(quat)
         baseline.append([trans.x(), trans.y(), trans.z()])
 
     baseline = np.array(baseline).astype(np.float64)
+    quats = np.array(quats).astype(np.float64)
+
     avg_baseline = np.average(baseline, axis=0)
     sd = np.std(baseline, axis=0)
+    avg_quat = np.average(quats, axis=0)
+    quat_sd = np.std(quats, axis=0)
     print('Stereo Rig Baseline: {} {} {}'.format(avg_baseline,u'\u00B1', sd))
+    print('Quat: {} {} {}'.format(avg_quat,u'\u00B1', quat_sd))
