@@ -7,8 +7,8 @@ import numpy as np
 import gtsam
 
 if __name__ == '__main__':
-    filename = '/home/bjoshi/results/openwater/images.txt'
-    output = '/home/bjoshi/results/openwater/colmap.txt'
+    filename = '/home/bjoshi/mexico/images.txt'
+    output = '/home/bjoshi/mexico/colmap_traj.txt'
 
     fs = open(filename)
     for i in range(4):
@@ -35,7 +35,7 @@ if __name__ == '__main__':
         # only left_cam
         if(int(cam_id) == 1):
             # print(info_array)
-            stamp = info_array[9].split('.')[0]
+            stamp = info_array[9].split('.')[0].split('_')[1]
             # stamps.append(stamp)
             trans = np.array(info_array[5:8], dtype=np.float64)
             quat = gtsam.Rot3.Quaternion(float(info_array[1]), float(info_array[2]), float(

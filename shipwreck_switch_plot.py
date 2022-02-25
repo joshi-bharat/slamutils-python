@@ -157,7 +157,7 @@ if __name__ == '__main__':
     title = r'shipwreck\_lawnmower'
 
     svin_traj = file_interface.read_tum_trajectory_file(
-        os.path.join(folder, 'svin_traj.txt'))
+        os.path.join(folder, 'svin_traj_lc.txt'))
     prim_traj = file_interface.read_tum_trajectory_file(
         os.path.join(folder, 'prim_traj.txt'))
     uber_traj = file_interface.read_tum_trajectory_file(
@@ -214,12 +214,6 @@ if __name__ == '__main__':
         y = uber_copy.positions_xyz[:, 1]
 
         color = 'red' if info[0] == 0.0 else 'blue'
-        # if info[0] == 0.0:  # from VIO
-        #     vio_xs = np.append(vio_xs, x)
-        #     vio_ys = np.append(vio_ys, y)
-        # else:  # from prim
-        #     prim_xs = np.append(prim_xs, x)
-        #     prim_ys = np.append(prim_ys, y)
         ax.plot(x, y, '-.', color=color)
 
         uber_indx = np.abs(uber_traj.timestamps - info[3]).argmin()
