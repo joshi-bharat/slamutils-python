@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 from evo.core import trajectory
 
 
-def read_trajectory(file: str) -> List[Dict]:
+def read_trajectory_colmap(file: str) -> List[Dict]:
     left_poses = {}
     right_poses = {}
 
@@ -133,7 +133,7 @@ def display_stereo_depths(
             combined_map[combined_map > max_depth] = max_depth
 
             images.append([plt.imshow(combined_map, animated=True, cmap="summer")])
-    ani = animation.ArtistAnimation(fig, images, interval=50, blit=True, repeat=False)
+    ani = animation.ArtistAnimation(fig, images, interval=500, blit=True, repeat=False)
     plt.title(title)
     plt.show()
 
@@ -186,3 +186,11 @@ def write_evo_traj(filename: str, stamps: List[str], traj: trajectory.PoseTrajec
             f.write(
                 f"{stamp} {trans[0]} {trans[1]} {trans[2]} {quat[1]} {quat[2]} {quat[3]} {quat[0]}\n"
             )
+
+
+def get_stamps_from_tum_trajectory(filename: str) -> List[str]:
+    with (open(filename, "r")) as f:
+        lines = f.readlines()
+        stamps = [line.split(" ")[0] for line in lines]
+        stamps = [stamp.replace(".", "") for stamp in stamps]
+    return stamps

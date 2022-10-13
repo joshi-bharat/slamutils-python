@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-from gettext import translation
-import open3d
 from evo.tools.settings import SETTINGS
 import numpy as np
 import pprint
@@ -10,63 +8,74 @@ from evo.tools import log, plot, file_interface
 from matplotlib import pyplot as plt
 import os
 import copy
-log.configure_logging(verbose=True, debug=True, silent=False)
+from colmap_utils import get_stamps_from_tum_trajectory, write_evo_traj
+
+log.configure_logging(verbose=True, debug=False, silent=False)
 
 # temporarily override some package settings
 SETTINGS.plot_usetex = False
 
-if __name__ == '__main__':
-    folder = '/home/bjoshi/mexico'
-    svin_file = os.path.join(folder, 'svin_traj_camera.txt')
-    colmap_file = os.path.join(folder, 'colmap_traj_interpolated.txt')
 
-    svin_traj = file_interface.read_tum_trajectory_file(svin_file)
-    colmap_traj = file_interface.read_tum_trajectory_file(colmap_file)
+def align_trajectories(
+    ref_traj, traj, max_diff=0.1, align_origin=False, correct_scale=False
+):
 
-    max_diff = 0.01
-    svin_traj, colmap_traj = sync.associate_trajectories(
-        svin_traj, colmap_traj, max_diff)
+    ref_sync, traj_sync = sync.associate_trajectories(ref_traj, traj, max_diff)
 
-    colmap_aligned_traj = copy.deepcopy(colmap_traj)
-    rot, translation, scale = colmap_aligned_traj.align(
-        svin_traj, correct_scale=True, correct_only_scale=False)
+    aligned_traj = copy.deepcopy(traj_sync)
     transform_4x4 = np.identity(4)
-    transform_4x4[:3, :3] = rot
-    transform_4x4[:3, 3] = translation
+    scale = 1.0
+    if align_origin:
+        transform_4x4 = aligned_traj.align_origin(ref_traj)
+    else:
+        rot, translation, scale = aligned_traj.align(
+            ref_sync, correct_scale=correct_scale
+        )
+        transform_4x4[:3, :3] = rot
+        transform_4x4[:3, 3] = translation
 
+    return transform_4x4, scale, aligned_traj
+
+
+def plot_trajs(ref_traj, traj, aligned_traj):
     fig = plt.figure()
-    traj_by_label = {
-        "colmap (not aligned)": colmap_traj,
-        "colmap (aligned)": colmap_aligned_traj,
-        "svin": svin_traj
-    }
+    traj_by_label = {"svin": traj, "svin (aligned)": aligned_traj, "colmap": ref_traj}
 
     plot.trajectories(fig, traj_by_label, plot.PlotMode.xyz)
     plt.show()
 
-    colmap_pcd = open3d.io.read_point_cloud(
-        os.path.join(folder, 'colmap_pcd.ply'))
 
-    colmap_pcd.scale(scale, np.array([0, 0, 0]))
-    colmap_pcd.transform(transform_4x4)
+def write_traj(traj, filename):
+    file_interface.save_trajectory(traj, filename)
 
-    svin_pcd = open3d.io.read_point_cloud(
-        os.path.join(folder, 'svin_traj_camera.ply'))
 
-    open3d.visualization.draw_geometries([colmap_pcd, svin_pcd])
+if __name__ == "__main__":
 
-    svin_pcd_array = np.asarray(svin_pcd.points)
-    colmap_pcd_array = np.asarray(colmap_pcd.points)
-    svin_colors = np.asarray(svin_pcd.colors)
-    colmap_colors = np.asarray(colmap_pcd.colors)
+    dataset_name = "coral_reef"
+    folder = "/home/bjoshi/code/slamutils-python/icra"
 
-    combined_points = np.concatenate(
-        (svin_pcd_array, colmap_pcd_array), axis=0)
-    combined_colors = np.concatenate((svin_colors, colmap_colors), axis=0)
+    colmap_file = os.path.join(folder, f"colmap_{dataset_name}.txt")
+    svin_file = os.path.join(folder, f"svin.txt")
 
-    combined_pcd = open3d.geometry.PointCloud()
-    combined_pcd.points = open3d.utility.Vector3dVector(combined_points)
-    combined_pcd.colors = open3d.utility.Vector3dVector(combined_colors)
+    svin_traj = file_interface.read_tum_trajectory_file(svin_file)
+    colmap_traj = file_interface.read_tum_trajectory_file(colmap_file)
 
-    open3d.io.write_point_cloud(
-        'svin_traj_with_colmap_pointcloud.ply', combined_pcd)
+    transform_4x4, scale, svin_aligned_traj = align_trajectories(
+        colmap_traj, svin_traj, align_origin=False, correct_scale=True
+    )
+
+    plot_trajs(colmap_traj, svin_traj, svin_aligned_traj)
+
+    pose_relation = metrics.PoseRelation.translation_part
+    data = (colmap_traj, svin_aligned_traj)
+    print(colmap_traj)
+    print(svin_aligned_traj)
+    ape_metric = metrics.APE(pose_relation)
+    ape_metric.process_data(data)
+
+    ape_stats = ape_metric.get_all_statistics()
+    pprint.pprint(ape_stats)
+
+    original_stamps = get_stamps_from_tum_trajectory(svin_file)
+    svin_aligned_file = os.path.join(folder, f"{dataset_name}_svin_aligned_traj.txt")
+    write_evo_traj(svin_aligned_file, original_stamps, svin_aligned_traj)
