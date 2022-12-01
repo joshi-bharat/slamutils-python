@@ -16,7 +16,7 @@ import copy
 from colmap_utils import (
     compute_baseline,
     display_stereo_depths,
-    read_trajectory,
+    read_trajectory_colmap,
     read_array,
     write_array,
     write_evo_traj,
@@ -165,9 +165,9 @@ def write_stereo_images(
 
 if __name__ == "__main__":
 
-    dataset_name = "shipwreck_stavronikita"
+    dataset_name = "shipwreck_pamir"
     base_dir = "/home/bjoshi/colmap"
-    display = False
+    display = True
     type = "geometric"
 
     dataset_to_robot = {
@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
     correct_baseline = baselines[dataset_to_robot[dataset_name]]
     colmap_folder = os.path.join(base_dir, dataset_name)
-    colmap_left_poses, colmap_right_poses = read_trajectory(
+    colmap_left_poses, colmap_right_poses = read_trajectory_colmap(
         os.path.join(colmap_folder, "images.txt")
     )
     colmap_trans, colmap_quats = get_extrinsics(colmap_left_poses, colmap_right_poses)
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     plt.show()
 
     stereo_folder = os.path.join(colmap_folder, "stereo")
-    colmap_stereo_left_poses, colmap_stereo_right_poses = read_trajectory(
+    colmap_stereo_left_poses, colmap_stereo_right_poses = read_trajectory_colmap(
         os.path.join(stereo_folder, "images.txt")
     )
     stereo_trans, stereo_quats = get_extrinsics(
