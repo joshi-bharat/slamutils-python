@@ -16,6 +16,14 @@ def interpolate_traj(
     z = positions[:, 2]
     timestamps = traj.timestamps
 
+    first_index = 0
+    last_index = len(ref_timestamps) - 1
+    while ref_timestamps[first_index] < timestamps[0]:
+        first_index += 1
+    while ref_timestamps[last_index] > timestamps[-1]:
+        last_index -= 1
+    ref_timestamps = ref_timestamps[first_index:last_index]
+    
     # interpolate positions
     x_interp_positions = np.interp(ref_timestamps, timestamps, x, left=None, right=None)
     y_interp_positions = np.interp(ref_timestamps, timestamps, y, left=None, right=None)
@@ -52,6 +60,7 @@ def read_tum_trajectory(filename: str)-> PoseTrajectory3D:
                 line = [float(x) for x in line]
                 all_lines.append(line)
     data = np.array(all_lines).astype(float)
+    data = data[:, :8]
     df = pd.DataFrame(
         data, columns=["stamp", "tx", "ty", "tz", "qw", "qx", "qy", "qz"]
     )
@@ -65,4 +74,3 @@ def read_tum_trajectory(filename: str)-> PoseTrajectory3D:
         print("Loaded {} stamps and poses from: {}".format(
             len(stamps), filename))
     return PoseTrajectory3D(xyz, quat, stamps)
-
