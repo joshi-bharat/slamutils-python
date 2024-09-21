@@ -1,2 +1,4 @@
 *.pdf
 vi_comparison/__pycache__/
+slam_utils/__pycache__/
+.idea/
