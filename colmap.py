@@ -7,13 +7,11 @@ import numpy as np
 import open3d
 import pandas as pd
 from evo.core import trajectory
-from evo.tools import plot
 from matplotlib import pyplot as plt
-from plot_traj import plot_traj, prepare_axis
 from typing import List, Dict, Optional
 from gtsam import Pose3
 import copy
-from colmap_utils import (
+from slam_utils.colmap_utils import (
     compute_baseline,
     display_stereo_depths,
     read_trajectory_colmap,

@@ -179,6 +179,7 @@ def write_gtsam_poses(gtsam_poses: Dict[str, Pose3], filename: str):
 def write_evo_traj(filename: str, stamps: List[str], traj: trajectory.PoseTrajectory3D):
 
     with open(filename, "w") as f:
+        f.write(f"#timestamp \t p_x \t p_y \t p_z \t q_x \t q_y \t q_z \t q_w\n")
         for stamp, trans, quat in zip(
             stamps, traj.positions_xyz, traj.orientations_quat_wxyz
         ):

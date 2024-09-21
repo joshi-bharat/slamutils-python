@@ -8,7 +8,7 @@ from evo.tools import log, plot, file_interface
 from matplotlib import pyplot as plt
 import os
 import copy
-from colmap_utils import get_stamps_from_tum_trajectory, write_evo_traj
+from slam_utils.colmap_utils import get_stamps_from_tum_trajectory, write_evo_traj
 
 log.configure_logging(verbose=True, debug=False, silent=False)
 

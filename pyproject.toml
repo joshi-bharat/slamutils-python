@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "slam-utils"
+version = "0.1.0"
+description = ""
+authors = ["Bharat Joshi <joshibharat21@gmail.com>"]
+packages = [{include = "slam_utils"}]
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+evo = "^1.30.0"
+gtsam = ">=4.2"
+tabulate = "^0.9.0"
+black = "^24.8.0"
+
+[virtualenvs]
+create = true
+in-project = true
+
+[build-system]
+requires = ["poetry-core>=1.5"]
+build-backend = "poetry.core.masonry.api"

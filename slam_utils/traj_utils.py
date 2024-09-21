@@ -15,6 +15,9 @@ def interpolate_traj(
     y = positions[:, 1]
     z = positions[:, 2]
     timestamps = traj.timestamps
+    for i in range(len(timestamps)-1):
+        if timestamps[i+1] <= timestamps[i]:
+            print(i)
 
     first_index = 0
     last_index = len(ref_timestamps) - 1

@@ -1,12 +1,12 @@
 from pathlib import Path
 from evo.tools import log, plot, file_interface
-from evo.core import sync, metrics, trajectory
+from evo.core import sync, metrics
 import seaborn as sns
 import matplotlib
 import matplotlib.pyplot as plt
 
-from traj_utils import interpolate_traj, read_tum_trajectory
-from plot_traj import prepare_axis, plot_traj
+from slam_utils.traj_utils import interpolate_traj, read_tum_trajectory
+from slam_utils.plot_traj import prepare_axis, plot_traj
 
 log.configure_logging(verbose=True)
 
